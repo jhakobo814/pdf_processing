@@ -219,8 +219,19 @@ class CYExtractor(BaseExtractor):
             if idx > 3:
                 continue
 
-            if m := re.search(r"Facility\s+(.+?)(?=\nAddress\b)", block, re.I | re.S):
-                data[f"{prefix}_customer_{idx}"] = " ".join(m.group(1).split()).strip()
+            # if m := re.search(r"Facility\s+(.+?)(?=\nAddress\b)", block, re.I | re.S):
+            #     data[f"{prefix}_customer_{idx}"] = " ".join(m.group(1).split()).strip()
+            facility_matches = list(
+                re.finditer(
+                    r"(?:^|\n)Facility\s+(?!Notes\b)(.+?)(?=\nAddress\b)",
+                    block,
+                    re.I | re.S
+                )
+            )
+
+            if facility_matches:
+                facility_value = facility_matches[-1].group(1)
+                data[f"{prefix}_customer_{idx}"] = " ".join(facility_value.split()).strip()
 
             address, city, state, zipcode = self._extract_address(block)
             data[f"{prefix}_address_{idx}"] = address
